@@ -10,10 +10,11 @@ import os
 
 # Add project root to import path
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+GENERATED_DIR = os.path.join(HERE, "generated")
+sys.path.insert(0, GENERATED_DIR)
 
 
-from navigation_logic import decide_next_move
+from generated.navigation_logic import decide_next_move
 
 VALID_ACTIONS = {"FORWARD", "LEFT", "RIGHT", "STOP"}
 
