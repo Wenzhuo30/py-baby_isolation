@@ -1,0 +1,22 @@
+world:
+  height: 10
+  width: 10
+  step_time: 0.1
+  sample_time: 0.1
+  offset: [0, 0]
+
+robot:
+  kinematics: {name: 'diff'}
+  shape: {name: 'circle', radius: 0.2}
+  state: [1, 1, 0]
+  goal: [8, 4, 0]
+  color: 'g'
+  plot:
+    show_trajectory: True
+    show_goal: True
+
+obstacle:
+  - shape: {name: 'rectangle', length: 0.8, width: 0.8}
+    state: [3, 1, 0]
+  - shape: {name: 'rectangle', length: 0.8, width: 0.8}
+    state: [5, 2.5, 0]

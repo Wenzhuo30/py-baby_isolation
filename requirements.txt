@@ -1,1 +1,9 @@
 openai>=1.40.0
+# The Test Agent executes the tests it generates with pytest.
+pytest>=8.0.0
+# IR-SIM is used for the realistic (visual) world simulation and the benchmark.
+# Install with: uv pip install ir-sim   (or)   pip install ir-sim
+ir-sim>=2.0.0
+# test_irsim_with_agent.py needs numpy and matplotlib (installed with ir-sim).
+numpy
+matplotlib

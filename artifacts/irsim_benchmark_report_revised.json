@@ -1,0 +1,113 @@
+{
+  "total_worlds": 5,
+  "goals_reached": 5,
+  "success_rate": 1.0,
+  "efficient_worlds": 5,
+  "inefficient_success_worlds": 0,
+  "failed_worlds": 0,
+  "efficiency_rate": 1.0,
+  "average_steps_taken": 173.0,
+  "total_steps_taken": 865,
+  "efficient_step_limit": 200,
+  "max_steps_allowed": 300,
+  "navigation_logic": "generated\\navigation_logic_revised.py",
+  "world_files": [
+    "irsim_worlds\\world_easy.yaml",
+    "irsim_worlds\\world_medium.yaml",
+    "irsim_worlds\\world_difficult.yaml",
+    "irsim_worlds\\world_custom.yaml",
+    "irsim_worlds\\world_hard.yaml"
+  ],
+  "results": [
+    {
+      "reached_goal": true,
+      "collision_or_done": false,
+      "steps_taken": 150,
+      "max_steps_allowed": 300,
+      "efficient_step_limit": 200,
+      "efficiency_status": "efficient",
+      "efficiency_passed": true,
+      "final_pose": [
+        7.815877736477747,
+        1.35416409613743,
+        -0.7200000000000006
+      ],
+      "history_length": 150,
+      "world_file": "irsim_worlds\\world_easy.yaml",
+      "navigation_logic": "generated\\navigation_logic_revised.py",
+      "runner_returncode": 0
+    },
+    {
+      "reached_goal": true,
+      "collision_or_done": false,
+      "steps_taken": 148,
+      "max_steps_allowed": 300,
+      "efficient_step_limit": 200,
+      "efficiency_status": "efficient",
+      "efficiency_passed": true,
+      "final_pose": [
+        7.712490771958734,
+        4.253312110735628,
+        -0.40000000000000036
+      ],
+      "history_length": 148,
+      "world_file": "irsim_worlds\\world_medium.yaml",
+      "navigation_logic": "generated\\navigation_logic_revised.py",
+      "runner_returncode": 0
+    },
+    {
+      "reached_goal": true,
+      "collision_or_done": false,
+      "steps_taken": 187,
+      "max_steps_allowed": 300,
+      "efficient_step_limit": 200,
+      "efficiency_status": "efficient",
+      "efficiency_passed": true,
+      "final_pose": [
+        7.67814415627635,
+        8.127051090332003,
+        0.0
+      ],
+      "history_length": 187,
+      "world_file": "irsim_worlds\\world_difficult.yaml",
+      "navigation_logic": "generated\\navigation_logic_revised.py",
+      "runner_returncode": 0
+    },
+    {
+      "reached_goal": true,
+      "collision_or_done": false,
+      "steps_taken": 193,
+      "max_steps_allowed": 300,
+      "efficient_step_limit": 200,
+      "efficiency_status": "efficient",
+      "efficiency_passed": true,
+      "final_pose": [
+        7.963211951972691,
+        4.376850671335502,
+        -1.200000000000001
+      ],
+      "history_length": 193,
+      "world_file": "irsim_worlds\\world_custom.yaml",
+      "navigation_logic": "generated\\navigation_logic_revised.py",
+      "runner_returncode": 0
+    },
+    {
+      "reached_goal": true,
+      "collision_or_done": false,
+      "steps_taken": 187,
+      "max_steps_allowed": 300,
+      "efficient_step_limit": 200,
+      "efficiency_status": "efficient",
+      "efficiency_passed": true,
+      "final_pose": [
+        7.67814415627635,
+        8.127051090332003,
+        0.0
+      ],
+      "history_length": 187,
+      "world_file": "irsim_worlds\\world_hard.yaml",
+      "navigation_logic": "generated\\navigation_logic_revised.py",
+      "runner_returncode": 0
+    }
+  ]
+}

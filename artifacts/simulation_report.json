@@ -1,0 +1,1351 @@
+{
+  "policy_version": "brief-v1: safe goal-directed navigation, stop when no safe direction",
+  "state_keys": [
+    "blocked_front",
+    "blocked_left",
+    "blocked_right",
+    "goal_front",
+    "goal_left",
+    "goal_right"
+  ],
+  "valid_actions": [
+    "FORWARD",
+    "LEFT",
+    "RIGHT",
+    "STOP"
+  ],
+  "total_scenarios": 64,
+  "passed_scenarios": 64,
+  "failed_scenarios": 0,
+  "success_rate": 1.0,
+  "safety_violations": 0,
+  "invalid_actions": 0,
+  "exceptions": 0,
+  "preference_mismatches": 0,
+  "status": "PASSED",
+  "failed_details": [],
+  "results": [
+    {
+      "scenario_id": "S00",
+      "name": "B(none)_G(none)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S01",
+      "name": "B(none)_G(right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT",
+        "FORWARD",
+        "LEFT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S02",
+      "name": "B(none)_G(left)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "FORWARD",
+        "RIGHT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S03",
+      "name": "B(none)_G(left,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "RIGHT",
+        "FORWARD"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S04",
+      "name": "B(none)_G(front)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S05",
+      "name": "B(none)_G(front,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "RIGHT",
+        "LEFT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S06",
+      "name": "B(none)_G(front,left)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S07",
+      "name": "B(none)_G(front,left,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S08",
+      "name": "B(right)_G(none)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S09",
+      "name": "B(right)_G(right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S10",
+      "name": "B(right)_G(left)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "FORWARD"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S11",
+      "name": "B(right)_G(left,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "FORWARD"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S12",
+      "name": "B(right)_G(front)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S13",
+      "name": "B(right)_G(front,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S14",
+      "name": "B(right)_G(front,left)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S15",
+      "name": "B(right)_G(front,left,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "LEFT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S16",
+      "name": "B(left)_G(none)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S17",
+      "name": "B(left)_G(right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT",
+        "FORWARD"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S18",
+      "name": "B(left)_G(left)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S19",
+      "name": "B(left)_G(left,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT",
+        "FORWARD"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S20",
+      "name": "B(left)_G(front)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S21",
+      "name": "B(left)_G(front,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S22",
+      "name": "B(left)_G(front,left)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S23",
+      "name": "B(left)_G(front,left,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD",
+        "RIGHT"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S24",
+      "name": "B(left,right)_G(none)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S25",
+      "name": "B(left,right)_G(right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S26",
+      "name": "B(left,right)_G(left)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S27",
+      "name": "B(left,right)_G(left,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S28",
+      "name": "B(left,right)_G(front)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S29",
+      "name": "B(left,right)_G(front,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S30",
+      "name": "B(left,right)_G(front,left)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S31",
+      "name": "B(left,right)_G(front,left,right)",
+      "state": {
+        "blocked_front": false,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "FORWARD",
+      "acceptable_actions": [
+        "FORWARD"
+      ],
+      "actual": "FORWARD",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S32",
+      "name": "B(front)_G(none)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S33",
+      "name": "B(front)_G(right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT",
+        "LEFT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S34",
+      "name": "B(front)_G(left)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S35",
+      "name": "B(front)_G(left,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S36",
+      "name": "B(front)_G(front)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S37",
+      "name": "B(front)_G(front,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT",
+        "LEFT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S38",
+      "name": "B(front)_G(front,left)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S39",
+      "name": "B(front)_G(front,left,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT",
+        "RIGHT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S40",
+      "name": "B(front,right)_G(none)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S41",
+      "name": "B(front,right)_G(right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S42",
+      "name": "B(front,right)_G(left)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S43",
+      "name": "B(front,right)_G(left,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S44",
+      "name": "B(front,right)_G(front)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S45",
+      "name": "B(front,right)_G(front,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S46",
+      "name": "B(front,right)_G(front,left)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S47",
+      "name": "B(front,right)_G(front,left,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": false,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "LEFT",
+      "acceptable_actions": [
+        "LEFT"
+      ],
+      "actual": "LEFT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S48",
+      "name": "B(front,left)_G(none)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S49",
+      "name": "B(front,left)_G(right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S50",
+      "name": "B(front,left)_G(left)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S51",
+      "name": "B(front,left)_G(left,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S52",
+      "name": "B(front,left)_G(front)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S53",
+      "name": "B(front,left)_G(front,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S54",
+      "name": "B(front,left)_G(front,left)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S55",
+      "name": "B(front,left)_G(front,left,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": false,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "RIGHT",
+      "acceptable_actions": [
+        "RIGHT"
+      ],
+      "actual": "RIGHT",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S56",
+      "name": "B(front,left,right)_G(none)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "STOP",
+      "acceptable_actions": [
+        "STOP"
+      ],
+      "actual": "STOP",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S57",
+      "name": "B(front,left,right)_G(right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "STOP",
+      "acceptable_actions": [
+        "STOP"
+      ],
+      "actual": "STOP",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S58",
+      "name": "B(front,left,right)_G(left)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "STOP",
+      "acceptable_actions": [
+        "STOP"
+      ],
+      "actual": "STOP",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S59",
+      "name": "B(front,left,right)_G(left,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": false,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "STOP",
+      "acceptable_actions": [
+        "STOP"
+      ],
+      "actual": "STOP",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S60",
+      "name": "B(front,left,right)_G(front)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": false
+      },
+      "expected": "STOP",
+      "acceptable_actions": [
+        "STOP"
+      ],
+      "actual": "STOP",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S61",
+      "name": "B(front,left,right)_G(front,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": false,
+        "goal_right": true
+      },
+      "expected": "STOP",
+      "acceptable_actions": [
+        "STOP"
+      ],
+      "actual": "STOP",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S62",
+      "name": "B(front,left,right)_G(front,left)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": false
+      },
+      "expected": "STOP",
+      "acceptable_actions": [
+        "STOP"
+      ],
+      "actual": "STOP",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    },
+    {
+      "scenario_id": "S63",
+      "name": "B(front,left,right)_G(front,left,right)",
+      "state": {
+        "blocked_front": true,
+        "blocked_left": true,
+        "blocked_right": true,
+        "goal_front": true,
+        "goal_left": true,
+        "goal_right": true
+      },
+      "expected": "STOP",
+      "acceptable_actions": [
+        "STOP"
+      ],
+      "actual": "STOP",
+      "passed": true,
+      "reason": "OK",
+      "detail": "matches the reference policy"
+    }
+  ],
+  "generated_at": "2026-10-11T04:51:02+00:00",
+  "navigation_logic_path": "generated\\navigation_logic_revised.py"
+}

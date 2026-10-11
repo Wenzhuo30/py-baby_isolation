@@ -1,0 +1,15 @@
+{
+  "reached_goal": true,
+  "collision_or_done": false,
+  "steps_taken": 187,
+  "max_steps_allowed": 300,
+  "efficient_step_limit": 200,
+  "efficiency_status": "efficient",
+  "efficiency_passed": true,
+  "final_pose": [
+    7.67814415627635,
+    8.127051090332003,
+    0.0
+  ],
+  "history_length": 187
+}
