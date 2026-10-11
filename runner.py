@@ -82,9 +82,8 @@ FALLBACK_ORDER = ("FORWARD", "LEFT", "RIGHT")
 POLICY_VERSION = "brief-v1: safe goal-directed navigation, stop when no safe direction"
 
 
-# ---------------------------------------------------------------------------
+
 # Navigation logic loading
-# ---------------------------------------------------------------------------
 def load_navigation_callable(path=None):
     """Import ``decide_next_move`` from the generated navigation logic.
 
@@ -114,9 +113,8 @@ def load_navigation_callable(path=None):
     return navigation_fn
 
 
-# ---------------------------------------------------------------------------
+
 # Scenario definition
-# ---------------------------------------------------------------------------
 def _normalize_state(state):
     """Build a canonical six-key state dict from a state produced by any source."""
     if not isinstance(state, dict):
@@ -195,9 +193,8 @@ def _blocked_direction(action):
     return "blocked_%s" % direction
 
 
-# ---------------------------------------------------------------------------
+
 # Simulation
-# ---------------------------------------------------------------------------
 def simulate(navigation_fn, scenarios=None):
     """Run ``navigation_fn`` against every scenario and summarise the outcome.
 

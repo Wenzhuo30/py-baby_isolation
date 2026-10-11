@@ -125,9 +125,8 @@ The revision must:
 """ % {"state_contract": STATE_CONTRACT}
 
 
-# ---------------------------------------------------------------------------
+
 # Validation
-# ---------------------------------------------------------------------------
 def validate_code(code):
     """Validate the code produced by the Developer Agent.
 
@@ -272,9 +271,8 @@ def validate_navigation_behaviour(code, expected_path=None):
     return evaluation
 
 
-# ---------------------------------------------------------------------------
+
 # Deterministic fallback implementation
-# ---------------------------------------------------------------------------
 NAVIGATION_CODE_TEMPLATE = '''"""
 navigation_logic.py
 ===================
@@ -424,9 +422,7 @@ def write_navigation_logic(code, path=None):
     return path
 
 
-# ---------------------------------------------------------------------------
 # Developer agent runs
-# ---------------------------------------------------------------------------
 def _build_revision_prompt(original_code, review_notes, benchmark_report,
                            requirements, plan, benchmark_review=None,
                            attempt=1):
