@@ -1,10 +1,10 @@
 {
-  "strategy": "The robot prefers moving toward its goal whenever the direction is safe. It never moves into a blocked direction. When several safe directions are available, it first picks the one that points toward the goal; if none of the safe directions points toward the goal, it picks any safe direction. If no safe direction is available at all, it stops.",
+  "strategy": "The robot prefers moving toward its goal whenever that direction is safe. It never moves into a blocked direction. When no goal direction is safe it takes any safe direction (front, then left, then right). When no direction is safe it stops.",
   "decisions": [
     "FORWARD",
     "LEFT",
     "RIGHT",
     "STOP"
   ],
-  "stop_point": "The robot must stop when the path in front, to the left and to the right are all blocked, i.e. when no safe direction is available."
+  "stop_point": "The robot must stop when the path in front, to the left and to the right is blocked, i.e. when no safe direction is available."
 }

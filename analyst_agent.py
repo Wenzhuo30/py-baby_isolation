@@ -12,7 +12,7 @@ It asks the Qwen model to return a JSON object with EXACTLY this structure:
   "goal": "string",
   "allowed_actions": ["FORWARD", "LEFT", "RIGHT", "STOP"],
   "safe_stop": true,
-  "avoid.obstacles": true
+  "avoid_obstacles": true
 }
 
 The JSON content is produced by Qwen, never hard-coded by this program.
@@ -35,7 +35,7 @@ MODEL = os.getenv("QWEN_MODEL", "qwen-plus")
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 # The only keys / actions allowed in the whole system.
-REQUIRED_KEYS = {"goal", "allowed_actions", "safe_stop", "avoid.obstacles"}
+REQUIRED_KEYS = {"goal", "allowed_actions", "safe_stop", "avoid_obstacles"}
 VALID_ACTIONS = {"FORWARD", "LEFT", "RIGHT", "STOP"}
 MAX_ATTEMPTS = 3
 
@@ -51,7 +51,7 @@ The JSON object must contain EXACTLY these four keys and no others:
 - "goal": (string) the navigation objective understood from the brief.
 - "allowed_actions": (array of strings) every action the robot may take. It must contain exactly these four values and no others, in any order: "FORWARD", "LEFT", "RIGHT", "STOP".
 - "safe_stop": (boolean) true, because when no safe direction is available the robot must stop.
-- "avoid.obstacles": (boolean) true, because the robot must never move into a blocked direction and must avoid obstacles.
+- "avoid_obstacles": (boolean) true, because the robot must never move into a blocked direction and must avoid obstacles.
 
 RULES AND CONSTRAINTS:
 1. The only allowed actions in the whole system are FORWARD, LEFT, RIGHT, STOP. Never introduce any other action.
@@ -153,8 +153,8 @@ def validate_requirements(data):
 
     if not isinstance(data["safe_stop"], bool):
         raise ValueError('"safe_stop" must be a boolean.')
-    if not isinstance(data["avoid.obstacles"], bool):
-        raise ValueError('"avoid.obstacles" must be a boolean.')
+    if not isinstance(data["avoid_obstacles"], bool):
+        raise ValueError('"avoid_obstacles" must be a boolean.')
 
     return data
 

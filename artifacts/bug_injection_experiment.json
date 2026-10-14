@@ -1,0 +1,75 @@
+{
+  "instructions": "Testing instructions, page 9 - Introduce a bug",
+  "navigation_logic": "generated\\navigation_logic.py",
+  "injected_fault": "choose_action(): \"if goal_left and not blocked_left\" returned \"STOP\" instead of \"LEFT\" (safe but wrong, so only an expected-action comparison can catch it)",
+  "probe_state": {
+    "blocked_front": true,
+    "blocked_left": false,
+    "blocked_right": true,
+    "goal_front": false,
+    "goal_left": true,
+    "goal_right": false
+  },
+  "test_suites": [
+    "generated\\test_navigation_logic.py",
+    "test_generated_navigation_logic.py"
+  ],
+  "steps": [
+    {
+      "step": "correct logic",
+      "generated_tests": {
+        "returncode": 0,
+        "passed": 16,
+        "failed": 0,
+        "summary": "16 passed in 0.04s"
+      },
+      "level2_tests": {
+        "returncode": 0,
+        "passed": 20,
+        "failed": 0,
+        "summary": "20 passed in 0.04s"
+      },
+      "probe_action": "LEFT",
+      "verdict": "all tests pass (baseline)"
+    },
+    {
+      "step": "bug injected",
+      "probe_action": "STOP",
+      "verdict": "the robot stops instead of driving toward the goal (safe, so it is not a safety violation - it is simply wrong)"
+    },
+    {
+      "step": "buggy logic",
+      "generated_tests": {
+        "returncode": 1,
+        "passed": 14,
+        "failed": 2,
+        "summary": "2 failed, 14 passed in 0.14s"
+      },
+      "level2_tests": {
+        "returncode": 1,
+        "passed": 19,
+        "failed": 1,
+        "summary": "1 failed, 19 passed in 0.14s"
+      },
+      "verdict": "bug detected by the test suite"
+    },
+    {
+      "step": "bug removed",
+      "generated_tests": {
+        "returncode": 0,
+        "passed": 16,
+        "failed": 0,
+        "summary": "16 passed in 0.04s"
+      },
+      "level2_tests": {
+        "returncode": 0,
+        "passed": 20,
+        "failed": 0,
+        "summary": "20 passed in 0.04s"
+      },
+      "probe_action": "LEFT",
+      "verdict": "all tests pass again"
+    }
+  ],
+  "conclusion": "The generated tests and the Level 2 behavioral tests both detect the injected fault (all passed on the correct logic, failed while the bug was present, and passed again after it was removed), so the suite detects bugs instead of only printing 'passed'."
+}

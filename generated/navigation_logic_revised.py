@@ -4,7 +4,7 @@ navigation_logic.py
 Navigation logic for the mobile robot.
 
 Implemented by the Developer Agent from the navigation plan:
- The robot prefers moving toward its goal whenever the direction is safe. It never moves into a blocked direction. When several safe directions are available, it first picks the one that points toward the goal; if none of the safe directions points toward the goal, it picks any safe direction. If ...
+ The robot prefers moving toward its goal whenever that direction is safe. It never moves into a blocked direction. When no goal direction is safe it takes any safe direction (front, then left, then right). When no direction is safe it stops.
  Revision notes applied by the Developer Agent:
  Keep the current decide_next_move implementation and continue with the IR-SIM benchmark.
 

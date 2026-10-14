@@ -7,5 +7,5 @@
     "STOP"
   ],
   "safe_stop": true,
-  "avoid.obstacles": true
+  "avoid_obstacles": true
 }

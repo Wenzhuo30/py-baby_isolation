@@ -49,7 +49,9 @@ agentic_se/
 ├── artifacts/                    # Requirements, plan, reports, reviews (generated)
 ├── trace.log                     # Full orchestration log (generated)
 ├── brief_to_req.py, run_*.py     # Step-by-step runners for the individual agents
-├── test_analyst.py, test_planner.py, test_developer.py   # Level-1 smoke tests
+├── test_analyst.py, test_planner.py, test_developer.py   # Level-1 agent smoke tests
+├── test_generated_navigation_logic.py                    # Level-2 behavioral tests
+├── experiment_bug_injection.py   # Proves the tests detect an injected fault
 ├── requirements.txt, .env.example, .gitignore
 └── robot_requirements.txt
 ```
@@ -164,7 +166,77 @@ active (`python` must resolve to the interpreter that has `ir-sim` installed).
 | `artifacts/simulation_review.json` | `reviewer_agent.py` | `issue`, `likely_cause`, `recommendation`, `needs_revision` |
 | `artifacts/irsim_benchmark_report.json` | `benchmark_irsim.py` | success rate, efficiency rate, average steps, per-world results |
 | `artifacts/irsim_benchmark_review.json` | `reviewer_benchmark_agent.py` | `issue`, `likely_cause`, `recommendation`, `safety_passed`, `goal_completion_passed`, `efficiency_passed`, `needs_revision` |
+| `artifacts/test_results.json` | `test_agent.py` | passed/failed/errors of the generated pytest run + the exact pytest command |
+| `artifacts/bug_injection_experiment.json` | `experiment_bug_injection.py` | evidence that the tests detect an injected fault (see below) |
+| `artifacts/navigation_logic.py` | `test_developer.py` | copy of the generated logic, so the documented `artifacts/` path also exists |
 | `trace.log` | `main.py` | every pipeline event, including the failing stages |
+
+### The requirements artifact
+
+`artifacts/requirements.json` uses exactly the four keys the instructions specify,
+and `allowed_actions` holds only the four valid actions and nothing extra:
+
+```json
+{
+  "goal": "navigate toward the goal location",
+  "allowed_actions": ["FORWARD", "LEFT", "RIGHT", "STOP"],
+  "safe_stop": true,
+  "avoid_obstacles": true
+}
+```
+
+`analyst_agent.validate_requirements()` rejects both missing keys and any key that
+Qwen invents, so the artifact cannot silently drift away from this structure.
+
+### Testing strategy
+
+Two levels, as required:
+
+- **Level 1 – agent/pipeline smoke tests** (`test_analyst.py`, `test_planner.py`,
+  `test_developer.py`): run the real agents on the real artifacts and let each
+  agent's own validation accept or reject the output. The tests use real
+  assertions, so a broken agent fails the test instead of only printing text.
+  These three need `DASHSCOPE_API_KEY`; without it they are reported as **skipped**
+  (loudly, with the reason) because the agents cannot run at all. The pipeline
+  itself still runs offline through the deterministic fallbacks in `main.py`.
+- **Level 2 – behavioral tests** (`test_generated_navigation_logic.py`): calls
+  `decide_next_move(state)` with known states and checks both that the action is
+  valid and that it is the expected move. The same cases work as a printed
+  PASS/FAIL report (`python test_generated_navigation_logic.py`) and as pytest
+  tests.
+- The Test Agent additionally generates `generated/test_navigation_logic.py`,
+  which sweeps all 64 perception states.
+
+```bash
+python -m pytest test_analyst.py test_planner.py test_developer.py \
+                  test_generated_navigation_logic.py generated/test_navigation_logic.py -v
+```
+
+Each root-level test file also still runs on its own as a script
+(`python test_developer.py`), which prints everything and exits non-zero on
+failure, so both ways of running them agree.
+
+### Do the tests actually catch bugs?
+
+Yes — this is verified automatically instead of being asserted in prose
+(Testing instructions, page 9). `experiment_bug_injection.py` runs the tests on
+the correct logic, injects a realistic fault into `generated/navigation_logic.py`
+(the "goal is to the left and the left path is clear" branch returns `STOP`
+instead of `LEFT`), shows the tests failing, removes the fault and shows them
+passing again:
+
+```bash
+python experiment_bug_injection.py
+```
+
+The injected fault is deliberately **safe** — stopping never moves into a blocked
+direction, so the final safety guard inside `decide_next_move` accepts it. It can
+only be caught by comparing the returned action against the expected one, which is
+exactly what the behavioral tests do. (An earlier attempt injected `RIGHT` instead
+of `LEFT` and the guard rejected it and re-picked a safe direction, which is why
+the experiment records the safety-guard behaviour as well.) The full record of
+every step, including the pytest summaries, is written to
+`artifacts/bug_injection_experiment.json`.
 
 ### Benchmark metrics
 

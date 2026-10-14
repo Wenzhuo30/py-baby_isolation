@@ -271,7 +271,7 @@ def offline_requirements(brief_text):
         "goal": "navigate toward the goal location",
         "allowed_actions": ["FORWARD", "LEFT", "RIGHT", "STOP"],
         "safe_stop": True,
-        "avoid.obstacles": True,
+        "avoid_obstacles": True,
         "_source": "offline fallback (brief.txt + rule 1-4 of the brief)",
         "_brief_excerpt": " ".join(brief_text.split())[:200],
     }
@@ -308,11 +308,11 @@ def run_analyst_stage(brief_text, use_llm=True):
             except Exception as error:
                 current.mark("degraded", "Analyst Agent failed (%s); using the "
                                          "deterministic fallback" % error)
-                requirements = read_json(REQUIREMENTS_PATH) or offline_requirements(brief_text)
+                requirements = offline_requirements(brief_text)
         else:
-            requirements = read_json(REQUIREMENTS_PATH) or offline_requirements(brief_text)
+            requirements = offline_requirements(brief_text)
             current.mark("degraded", "Analyst Agent skipped the LLM (offline mode); "
-                                     "reused/built requirements.json")
+                                     "built requirements.json from the brief")
 
         requirements = validate_requirements(
             {key: value for key, value in requirements.items() if not key.startswith("_")}
@@ -336,11 +336,11 @@ def run_planner_stage(requirements, use_llm=True):
             except Exception as error:
                 current.mark("degraded", "Planner Agent failed (%s); using the "
                                          "deterministic fallback" % error)
-                plan = read_json(PLAN_PATH) or offline_plan(requirements)
+                plan = offline_plan(requirements)
         else:
-            plan = read_json(PLAN_PATH) or offline_plan(requirements)
+            plan = offline_plan(requirements)
             current.mark("degraded", "Planner Agent skipped the LLM (offline mode); "
-                                     "reused/built plan.json")
+                                     "built plan.json from the requirements")
 
         plan = validate_plan({key: value for key, value in plan.items()
                               if not key.startswith("_")})
