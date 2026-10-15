@@ -27,7 +27,9 @@ import os
 
 import pytest
 
-from developer_agent import _load_env_file, run_developer, validate_code
+from developer_agent import _load_env_file, refresh_artifact_copy, run_developer, validate_code
+
+from tools.llm_client import get_api_key
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PLAN_PATH = os.path.join(HERE, "artifacts", "plan.json")
@@ -37,7 +39,7 @@ OUTPUT_PATH = os.path.join(GENERATED_DIR, "navigation_logic.py")
 ARTIFACT_COPY_PATH = os.path.join(ARTIFACTS_DIR, "navigation_logic.py")
 
 _load_env_file()
-HAS_API_KEY = bool(os.getenv("DASHSCOPE_API_KEY"))
+HAS_API_KEY = bool(get_api_key())  # DashScope key or a local LLM_API_KEY
 
 
 @pytest.mark.skipif(not HAS_API_KEY,
@@ -85,12 +87,17 @@ def test_developer_agent():
         f.write(code)
         if not code.endswith("\n"):
             f.write("\n")
-    with open(ARTIFACT_COPY_PATH, "w", encoding="utf-8") as f:
-        f.write(code)
-        if not code.endswith("\n"):
-            f.write("\n")
+    # refresh_artifact_copy() is used instead of a raw write so the documented
+    # artifacts/navigation_logic.py can never drift away from the code the rest
+    # of the pipeline actually imports and benchmarks.
+    refresh_artifact_copy(code, ARTIFACT_COPY_PATH)
 
     assert os.path.exists(OUTPUT_PATH), "navigation logic artifact was not written"
+    assert os.path.exists(ARTIFACT_COPY_PATH), \
+        "artifacts/navigation_logic.py was not written"
+    with open(ARTIFACT_COPY_PATH, "r", encoding="utf-8") as f:
+        assert f.read().rstrip("\n") == code.rstrip("\n"), \
+            "artifacts/navigation_logic.py differs from the generated logic"
 
     print(f"\nNavigation logic saved to {OUTPUT_PATH}")
     print(f"Copy kept at {ARTIFACT_COPY_PATH}")

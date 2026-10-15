@@ -1,0 +1,145 @@
+{
+  "worlds": [
+    "irsim_worlds\\world_easy.yaml",
+    "irsim_worlds\\world_medium.yaml",
+    "irsim_worlds\\world_difficult.yaml",
+    "irsim_worlds\\world_custom.yaml",
+    "irsim_worlds\\world_hard.yaml"
+  ],
+  "results": [
+    {
+      "label": "det",
+      "file": "scratch\\_ab\\logic_deterministic.py",
+      "metrics": {
+        "total_worlds": 5,
+        "goals_reached": 5,
+        "success_rate": 1.0,
+        "efficient_worlds": 5,
+        "inefficient_success_worlds": 0,
+        "failed_worlds": 0,
+        "efficiency_rate": 1.0,
+        "average_steps_taken": 173.0,
+        "total_steps_taken": 865
+      },
+      "per_world": [
+        {
+          "world_file": "world_easy.yaml",
+          "reached_goal": true,
+          "steps_taken": 150,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        },
+        {
+          "world_file": "world_medium.yaml",
+          "reached_goal": true,
+          "steps_taken": 148,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        },
+        {
+          "world_file": "world_difficult.yaml",
+          "reached_goal": true,
+          "steps_taken": 187,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        },
+        {
+          "world_file": "world_custom.yaml",
+          "reached_goal": true,
+          "steps_taken": 193,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        },
+        {
+          "world_file": "world_hard.yaml",
+          "reached_goal": true,
+          "steps_taken": 187,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        }
+      ],
+      "scenario_check": {
+        "verified": true,
+        "total_scenarios": 64,
+        "unsafe_decisions": 0,
+        "invalid_actions": 0,
+        "exceptions": 0,
+        "differs_from_best_policy": 0,
+        "unsafe_details": [],
+        "differ_details": []
+      }
+    },
+    {
+      "label": "llm",
+      "file": "generated\\navigation_logic.py",
+      "metrics": {
+        "total_worlds": 5,
+        "goals_reached": 5,
+        "success_rate": 1.0,
+        "efficient_worlds": 5,
+        "inefficient_success_worlds": 0,
+        "failed_worlds": 0,
+        "efficiency_rate": 1.0,
+        "average_steps_taken": 173.0,
+        "total_steps_taken": 865
+      },
+      "per_world": [
+        {
+          "world_file": "world_easy.yaml",
+          "reached_goal": true,
+          "steps_taken": 150,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        },
+        {
+          "world_file": "world_medium.yaml",
+          "reached_goal": true,
+          "steps_taken": 148,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        },
+        {
+          "world_file": "world_difficult.yaml",
+          "reached_goal": true,
+          "steps_taken": 187,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        },
+        {
+          "world_file": "world_custom.yaml",
+          "reached_goal": true,
+          "steps_taken": 193,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        },
+        {
+          "world_file": "world_hard.yaml",
+          "reached_goal": true,
+          "steps_taken": 187,
+          "efficiency_status": "efficient",
+          "collision_or_done": false
+        }
+      ],
+      "scenario_check": {
+        "verified": true,
+        "total_scenarios": 64,
+        "unsafe_decisions": 0,
+        "invalid_actions": 0,
+        "exceptions": 0,
+        "differs_from_best_policy": 0,
+        "unsafe_details": [],
+        "differ_details": []
+      }
+    }
+  ],
+  "verdict": [
+    "the two implementations scored identically on every metric"
+  ],
+  "world_files": [
+    "irsim_worlds\\world_easy.yaml",
+    "irsim_worlds\\world_medium.yaml",
+    "irsim_worlds\\world_difficult.yaml",
+    "irsim_worlds\\world_custom.yaml",
+    "irsim_worlds\\world_hard.yaml"
+  ]
+}

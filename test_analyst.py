@@ -22,6 +22,8 @@ import pytest
 
 from analyst_agent import _load_env_file, run_analyst, validate_requirements
 
+from tools.llm_client import get_api_key
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 BRIEF_PATH = os.path.join(HERE, "brief.txt")
 ARTIFACTS_DIR = os.path.join(HERE, "artifacts")
@@ -32,7 +34,7 @@ OUTPUT_PATH = os.path.join(ARTIFACTS_DIR, "requirements.json")
 # skipped (loudly) instead of being reported as a failure.  Once the agent DOES
 # run, every check below is a hard assertion.
 _load_env_file()
-HAS_API_KEY = bool(os.getenv("DASHSCOPE_API_KEY"))
+HAS_API_KEY = bool(get_api_key())  # DashScope key or a local LLM_API_KEY
 
 
 @pytest.mark.skipif(not HAS_API_KEY,

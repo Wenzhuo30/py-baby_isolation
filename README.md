@@ -29,10 +29,19 @@ brief.txt
 
 ## Project structure
 
+The layout follows the "Overall Structure" diagram of the Requirements
+Engineering instructions: every file the instructions name stays at the
+repository root, and only the folders the instructions mandate (`artifacts/`,
+`generated/`, `irsim_worlds/`) plus two folders added here (`tools/`, `docs/`)
+are used.
+
 ```
-agentic_se/
-├── main.py                       # Orchestrator: runs the whole pipeline, writes trace.log
+scse_agentic_se_baby_isolation/
+│
+│  ── root: exactly what the instructions name ────────────────────────────
 ├── brief.txt                     # Customer's natural-language brief (input)
+├── robot_requirements.txt        # brief_to_req.py output (RE p3)
+├── main.py                       # Orchestrator: runs the whole pipeline, writes trace.log
 ├── analyst_agent.py              # Analyst Agent: run_analyst() + validate_requirements()
 ├── planner_agent.py              # Planner Agent: run_planner() + validate_plan()
 ├── developer_agent.py            # Developer Agent: run_developer() + run_developer_revision()
@@ -41,20 +50,39 @@ agentic_se/
 ├── reviewer_agent.py             # Reviewer Agent for the simulation report
 ├── benchmark_irsim.py            # IR-SIM benchmark over every world file
 ├── reviewer_benchmark_agent.py   # Reviewer Agent for the benchmark report
-├── test_irsim_with_agent.py      # Single-world IR-SIM entry point (visual run)
-├── _irsim_runner.py              # Headless bridge used by the benchmark
-├── run_visual.sh                 # ./run_visual.sh irsim_worlds/world_easy.yaml
-├── irsim_worlds/                 # world_easy / world_medium / world_difficult / world_custom / world_hard
-├── generated/                    # Navigation logic + generated tests (generated)
-├── artifacts/                    # Requirements, plan, reports, reviews (generated)
-├── trace.log                     # Full orchestration log (generated)
+├── test_irsim_with_agent.py      # Single-world IR-SIM entry point (given, unmodified)
+├── run_visual.sh                 # ./run_visual.sh irsim_worlds/world_easy.yaml (given)
 ├── brief_to_req.py, run_*.py     # Step-by-step runners for the individual agents
 ├── test_analyst.py, test_planner.py, test_developer.py   # Level-1 agent smoke tests
 ├── test_generated_navigation_logic.py                    # Level-2 behavioral tests
-├── experiment_bug_injection.py   # Proves the tests detect an injected fault
-├── requirements.txt, .env.example, .gitignore
-└── robot_requirements.txt
+├── experiment_bug_injection.py   # Proves the tests detect an injected fault (Testing p9)
+├── requirements.txt, .env.example, .gitignore, README.md
+│
+│  ── generated (safe to delete; the pipeline recreates them) ─────────────
+├── artifacts/                    # requirements.json, plan.json, reports, reviews
+├── generated/                    # navigation_logic.py + generated test modules
+├── trace.log                     # Full orchestration log
+├── visuals/                      # PNG snapshots of the head-less visual run
+├── irsim_worlds/                 # world_easy / medium / difficult / custom (+ hard)
+│
+│  ── added on top of the assignment ─────────────────────────────────────
+├── tools/                        # helpers, none of them named by the instructions
+│   ├── llm_client.py             #   one place resolving backend/model/credentials
+│   ├── check_llm.py              #   credential + JSON-mode pre-flight check
+│   ├── run_visual.py             #   same worlds; --show for the window, else PNGs
+│   ├── run_visual.cmd            #   Windows equivalent of run_visual.sh
+│   ├── compare_navigation_logic.py  # A/B benchmark of two navigation logics
+│   └── _pdf_tool.py              #   dependency-free PDF text extractor
+├── docs/                         # the course PDFs and the duplicate brief
+└── scratch/                      # development leftovers (git-ignored)
 ```
+
+Why the agents are **not** in an `agents/` subfolder: the instructions' structure
+diagram shows `analyst_agent.py` / `run_analyst.py` at the root, the Integration
+instructions say "Only the `developer_agent.py` file must be updated. Everything
+else is new", and the Testing checklist names the test files without a folder.
+Graders match those names, so moving them would break the expected layout.
+
 
 ## Setup
 
@@ -83,6 +111,78 @@ of these methods:
 Without a key the pipeline still runs end to end: every agent falls back to a
 deterministic implementation that follows the same contract (each fallback is
 recorded in `trace.log`).
+
+> **The graded run must have the key configured.** The Requirements Engineering
+> instructions are explicit that the requirements JSON "MUST come from Qwen and
+> not your Python program", so `artifacts/requirements.json` and
+> `artifacts/plan.json` have to be produced by Qwen, not by the offline fallback.
+>
+> Check the key **before** a scored run - this one request also verifies that the
+> model supports the JSON mode every agent depends on:
+>
+> ```bash
+> python tools/check_llm.py                       # or: python tools/check_llm.py --model qwen-max
+> ```
+>
+> It prints exactly where the key was found (environment variable or `.env`) and,
+> on failure, what to do about it (401 invalid key, 404 unknown model, 400 model
+> without JSON mode, network/timeout, 429 quota).
+>
+> `main.py` also refuses to report success when the two Qwen stages fell back:
+>
+> | exit code | meaning |
+> | --- | --- |
+> | `0` | every stage ran, `requirements.json`/`plan.json` are Qwen's output |
+> | `2` | **the Analyst/Planner stages fell back** - those artifacts are NOT Qwen's output (also logged as `ATTENTION` + `error` in `trace.log`) |
+> | `1` | the pipeline itself crashed |
+>
+> So a scoring run is only valid when `python main.py` exits `0` and
+> `trace.log` shows `AnalystAgent`/`PlannerAgent` as `ok` rather than `degraded`.
+
+### Optional: run against a local OpenAI-compatible model (Ollama)
+
+The "Ollama and Qwen installation" practice sheet runs `qwen3:8b` on your own
+machine. Two environment variables point every agent at that server instead of
+DashScope, so no DashScope key is needed:
+
+```bash
+# .env
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_API_KEY=ollama
+QWEN_MODEL=qwen3:8b
+```
+
+Then confirm the backend before relying on it, because a local model must support
+the JSON mode all six agents use:
+
+```bash
+python tools/check_llm.py
+```
+
+No agent code changes: `llm_client.py` resolves the endpoint, model and credential
+in exactly one place. Notes:
+
+- **Unset `LLM_BASE_URL` to return to DashScope** - that is the default and the
+  configuration the project instructions describe. `check_llm.py` prints a
+  reminder whenever a local/custom backend is active.
+- Expect **~1 minute per agent call** on CPU (thinking models emit a reasoning
+  block first), so a full pipeline takes 10-25 minutes rather than seconds.
+- Keep the model resident, otherwise Ollama unloads it between stages and a slow
+  in-flight request is left hanging. Recommended for a full local run:
+
+  ```bash
+  OLLAMA_KEEP_ALIVE=-1        # or: ollama run qwen3:8b --keepalive -1
+  ```
+
+- Each request has a finite timeout (`LLM_TIMEOUT`, default 300s locally / 60s on
+  DashScope). Without one, a stalled local request hangs the pipeline forever
+  with no error and no progress.
+- A thinking model can return an *empty* message when `max_tokens` is small,
+  because its reasoning consumes the whole budget. `check_llm.py` retries with a
+  larger budget instead of reporting a false failure.
+- `artifacts/requirements.json` and `plan.json` are then authored by the **local**
+  model. Still Qwen-family output, but the instructions describe the hosted Qwen -
+  confirm before submitting such a run.
 
 ## Run the whole pipeline
 
@@ -114,6 +214,8 @@ python runner.py               # code             -> artifacts/simulation_report
 python reviewer_agent.py       # simulation report-> artifacts/simulation_review.json
 python benchmark_irsim.py      # all worlds       -> artifacts/irsim_benchmark_report.json
 python reviewer_benchmark_agent.py   # benchmark  -> artifacts/irsim_benchmark_review.json
+python tools/run_visual.py           # 4 worlds, headless -> visuals/*.png + visual_run_report.json
+python experiment_bug_injection.py   # proves the tests detect an injected fault
 ```
 
 ## The navigation contract
@@ -158,6 +260,41 @@ correct the robot drives to its destination while avoiding the obstacles:
 Under WSL/Git-Bash use `bash run_visual.sh <world>`; on Windows the venv must be
 active (`python` must resolve to the interpreter that has `ir-sim` installed).
 
+**On Windows `run_visual.sh` cannot run at all** (`python3` and `bash` are not
+present). Use the `.cmd` wrapper, which runs the same worlds with this venv:
+
+```bat
+tools\run_visual.cmd                :: world_easy (the .sh default)
+tools\run_visual.cmd world_medium   :: one named world
+tools\run_visual.cmd all            :: all four worlds, one window each
+tools\run_visual.cmd all hold 5     :: ...each window auto-closed after 5s
+```
+
+Each run opens the interactive IR-SIM window and the robot drives to its goal.
+Close the window to continue.
+
+`run_visual.sh` opens the interactive matplotlib window, which cannot be looked at
+from a head-less session (CI, a remote shell, an automated agent).
+`run_visual.py` covers both cases:
+
+```bash
+python tools/run_visual.py                # head-less: one PNG per world, no window
+python tools/run_visual.py --show         # the interactive window, like run_visual.sh
+python tools/run_visual.py --hold 5       # a window per world, auto-closed after 5s
+```
+
+- `--show` / `--hold` open the **same** window the provided script does. Note that
+  `test_irsim_with_agent.py` calls `env.end()` (which closes the figure) *before*
+  its own `plt.show()`, so that `show()` normally has nothing left to display.
+  Both flags keep the figure alive across `end()` so the popup really appears.
+- Head-less mode (`python tools/run_visual.py`, no flags) writes
+  `visuals/world_easy.png` … and is what the automated benchmark uses, because a
+  batch or CI run must not block on a window.
+
+Neither `run_visual.sh` nor `test_irsim_with_agent.py` is modified: `run_visual.py`
+only wraps `irsim.make`/`env.end` for the duration of the call. `visuals/` is
+regenerable build output and is git-ignored, like the other reports.
+
 ## Reports and reviews
 
 | File | Produced by | Content |
@@ -168,7 +305,7 @@ active (`python` must resolve to the interpreter that has `ir-sim` installed).
 | `artifacts/irsim_benchmark_review.json` | `reviewer_benchmark_agent.py` | `issue`, `likely_cause`, `recommendation`, `safety_passed`, `goal_completion_passed`, `efficiency_passed`, `needs_revision` |
 | `artifacts/test_results.json` | `test_agent.py` | passed/failed/errors of the generated pytest run + the exact pytest command |
 | `artifacts/bug_injection_experiment.json` | `experiment_bug_injection.py` | evidence that the tests detect an injected fault (see below) |
-| `artifacts/navigation_logic.py` | `test_developer.py` | copy of the generated logic, so the documented `artifacts/` path also exists |
+| `artifacts/navigation_logic.py` | `test_developer.py` | the documented `artifacts/` copy of the generated logic, kept byte-identical by `developer_agent.refresh_artifact_copy()` |
 | `trace.log` | `main.py` | every pipeline event, including the failing stages |
 
 ### The requirements artifact
@@ -262,3 +399,5 @@ complete IR-SIM benchmark on the revised logic.
   non-interactive matplotlib backend so the five worlds can be measured in a batch.
 - A stray `__pycache__/navigation_logic.cpython-*.pyc` from an earlier run can be
   ignored; the generated sources are always re-imported by path.
+
+.\.venv\Scripts\python.exe tools\run_visual.py --show

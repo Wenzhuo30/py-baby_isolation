@@ -2,14 +2,23 @@ import json
 import os
 import re
 
-from openai import OpenAI
 
 ## System prompt for the Planner Agent
 ## Describe its role, the expected output format, and the rules it must follow when generating a navigation plan.
 ## These are fairly similar to the Analyst Agent, but with a focus on creating a plan based on the requirements provided by the Analyst Agent.
 
-MODEL = os.getenv("QWEN_MODEL", "qwen-plus")
-BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+from tools.llm_client import (
+    describe_backend,
+    get_base_url,
+    get_client,
+    get_model,
+    load_env_file as _load_env_file,
+)
+
+# Which model / endpoint the agents talk to.  DashScope + qwen-plus by default;
+# see llm_client.py for the LLM_BASE_URL / LLM_API_KEY overrides.
+MODEL = get_model()
+BASE_URL = get_base_url()
 
 # Keys the plan JSON must contain, and the only actions allowed in the system.
 REQUIRED_KEYS = {"strategy", "decisions", "stop_point"}
@@ -116,31 +125,8 @@ def run_planner(requirement):
 ## The helper functions below are the same ones I used in the Analyst Agent
 ## from the previous project, so both agents behave in the same way.
 
-def _load_env_file():
-    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-    if not os.path.exists(env_path):
-        return
-    with open(env_path, "r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, _, value = line.partition("=")
-            value = value.strip().strip('"').strip("'")
-            os.environ.setdefault(key.strip(), value)
-
-
-def get_client():
-    _load_env_file()
-    api_key = os.getenv("DASHSCOPE_API_KEY")
-    if not api_key:
-        raise RuntimeError(
-            "DASHSCOPE_API_KEY is not set. Configure it before running:\n"
-            '  PowerShell : $env:DASHSCOPE_API_KEY = "sk-..."\n'
-            '  bash       : export DASHSCOPE_API_KEY="sk-..."\n'
-            "or put  DASHSCOPE_API_KEY=sk-...  in a .env file next to this script."
-        )
-    return OpenAI(api_key=api_key, base_url=BASE_URL)
+# _load_env_file() and get_client() come from llm_client so that the backend
+# (DashScope by default) is resolved in exactly one place.
 
 
 def _parse_json(text):

@@ -1,7 +1,10 @@
 {
   "instructions": "Testing instructions, page 9 - Introduce a bug",
   "navigation_logic": "generated\\navigation_logic.py",
-  "injected_fault": "choose_action(): \"if goal_left and not blocked_left\" returned \"STOP\" instead of \"LEFT\" (safe but wrong, so only an expected-action comparison can catch it)",
+  "navigation_logic_kind": "model-generated",
+  "injected_fault": "the \"if goal_left and not blocked_left\" branch returned \"STOP\" instead of \"LEFT\" (safe but wrong, so only an expected-action comparison can catch it)",
+  "original_branch": "if goal_left and not blocked_left:\n        return \"LEFT\"\n    elif goal_right and not blocked_right:\n        return \"RIGHT\"\n    else:\n        if not blocked_front:\n            return \"FORWARD\"\n        elif not blocked_left:\n            return \"LEFT\"\n        elif not blocked_right:\n            return \"RIGHT\"\n        else:\n            return \"STOP\"",
+  "buggy_branch": "if goal_left and not blocked_left:\n        return \"STOP\"  # BUG (injected on purpose)\n    elif goal_right and not blocked_right:\n        return \"RIGHT\"\n    else:\n        if not blocked_front:\n            return \"FORWARD\"\n        elif not blocked_left:\n            return \"LEFT\"\n        elif not blocked_right:\n            return \"RIGHT\"\n        else:\n            return \"STOP\"",
   "probe_state": {
     "blocked_front": true,
     "blocked_left": false,
@@ -19,9 +22,9 @@
       "step": "correct logic",
       "generated_tests": {
         "returncode": 0,
-        "passed": 16,
+        "passed": 1,
         "failed": 0,
-        "summary": "16 passed in 0.04s"
+        "summary": "1 passed in 0.02s"
       },
       "level2_tests": {
         "returncode": 0,
@@ -41,9 +44,9 @@
       "step": "buggy logic",
       "generated_tests": {
         "returncode": 1,
-        "passed": 14,
-        "failed": 2,
-        "summary": "2 failed, 14 passed in 0.14s"
+        "passed": 0,
+        "failed": 1,
+        "summary": "1 failed in 0.13s"
       },
       "level2_tests": {
         "returncode": 1,
@@ -57,9 +60,9 @@
       "step": "bug removed",
       "generated_tests": {
         "returncode": 0,
-        "passed": 16,
+        "passed": 1,
         "failed": 0,
-        "summary": "16 passed in 0.04s"
+        "summary": "1 passed in 0.03s"
       },
       "level2_tests": {
         "returncode": 0,

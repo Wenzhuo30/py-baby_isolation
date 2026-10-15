@@ -3,9 +3,9 @@
   "target": "generated\\navigation_logic_revised.py",
   "test_file": "generated\\test_navigation_logic_revised.py",
   "returncode": 0,
-  "passed": 16,
+  "passed": 1,
   "failed": 0,
   "errors": 0,
   "status": "PASSED",
-  "command": "C:\\Users\\34812\\Desktop\\python\\py-baby_isolation\\.venv\\Scripts\\python.exe -m pytest C:\\Users\\34812\\Desktop\\python\\py-baby_isolation\\generated\\test_navigation_logic_revised.py -v --no-header -p no:cacheprovider"
+  "command": "C:\\Users\\34812\\Desktop\\python\\scse_agentic_se_baby_isolation\\.venv\\Scripts\\python.exe -m pytest C:\\Users\\34812\\Desktop\\python\\scse_agentic_se_baby_isolation\\generated\\test_navigation_logic_revised.py -v --no-header -p no:cacheprovider"
 }

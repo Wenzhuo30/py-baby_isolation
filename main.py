@@ -211,11 +211,17 @@ def read_text(path, default=""):
 
 
 def llm_available():
-    """True when a DashScope API key is configured (.env file or environment)."""
-    from analyst_agent import _load_env_file
+    """True when a usable LLM credential is configured.
 
-    _load_env_file()
-    return bool(os.getenv("DASHSCOPE_API_KEY"))
+    Accepts either credential, because the backend may be DashScope
+    (DASHSCOPE_API_KEY) or a local OpenAI-compatible server reached through
+    LLM_BASE_URL + LLM_API_KEY.  Checking only DASHSCOPE_API_KEY here used to
+    force the whole pipeline into offline mode even when a local model was
+    configured and reachable.
+    """
+    from tools.llm_client import get_api_key
+
+    return bool(get_api_key())
 
 
 def require_navigation_logic(path, fallback_path=None):
@@ -617,6 +623,20 @@ def main(argv=None):
     log("working directory: %s" % HERE)
     log("log file         : %s" % TRACE_PATH)
     log("llm enabled      : %s%s" % (use_llm, "" if use_llm else " (offline mode)"))
+
+    # State the backend explicitly: a run must never be ambiguous about whether
+    # the artifacts came from DashScope, from a local model, or from a fallback.
+    try:
+        from tools.llm_client import describe_backend
+
+        _backend = describe_backend()
+        log("llm backend      : %s (%s, model=%s, credential=%s)"
+            % (_backend["kind"], _backend["base_url"], _backend["model"],
+               _backend["credential_source"]))
+    except Exception as error:  # never let diagnostics break the run
+        log("llm backend      : unknown (%s: %s)" % (type(error).__name__, error),
+            level="warn", stage="setup")
+
     log("revision rounds  : %d" % args.rounds)
     log("ir-sim benchmark : %s" % ("skipped" if args.skip_irsim else "enabled"))
 
@@ -625,9 +645,9 @@ def main(argv=None):
 
         if use_llm and not llm_available():
             use_llm = False
-            log("DASHSCOPE_API_KEY not found -> falling back to the deterministic "
-                "agent implementations (the LLM prompts are still used when a key "
-                "is configured in .env)", level="warn", stage="setup")
+            log("no LLM credential found (neither DASHSCOPE_API_KEY nor "
+                "LLM_API_KEY) -> falling back to the deterministic agent "
+                "implementations", level="warn", stage="setup")
 
         # 1. load the brief ---------------------------------------------------
         with stage("LoadBrief", "read brief.txt") as current:
@@ -667,6 +687,20 @@ def main(argv=None):
         try:
             run_test_agent_stage(requirements, plan, navigation_path, use_llm=use_llm)
         except Exception as error:
+            # The stage may have failed *after* writing some of its files, and an
+            # earlier run may have left a report behind. Either way the remaining
+            # test_results.json would look like this run produced it, so it is
+            # removed (the failure is still recorded in trace.log).
+            for stale in (os.path.join(ARTIFACTS_DIR, "test_results.json"),
+                          GENERATED_TEST_PATH):
+                if os.path.exists(stale):
+                    try:
+                        os.remove(stale)
+                        log("removed stale %s so it cannot be mistaken for this run's "
+                            "result" % os.path.relpath(stale, HERE),
+                            level="warn", stage="TestAgent")
+                    except OSError:
+                        pass
             log("test agent stage failed: %s" % error, level="error", stage="TestAgent")
 
         # 6. simulation -------------------------------------------------------
@@ -776,21 +810,56 @@ def main(argv=None):
         log("simulation : %s" % summarize_report(simulation_report))
         if benchmark_report:
             log("benchmark  : %s" % summarize_report(benchmark_report))
+        log("=" * 78)
         log("revision rounds executed: %d" % rounds_done)
         log("total runtime: %.2fs" % (time.time() - started))
         log("full trace   : %s" % TRACE_PATH)
+
+        # The Requirements Engineering instructions require requirements.json (and
+        # therefore plan.json) to be authored by Qwen and "not your Python
+        # program".  A missing key makes the two stages fall back to the
+        # deterministic implementation, which produces a schema-valid but
+        # NOT Qwen-authored artifact.  That must not be reported as success.
+        qwen_stages = [record for record in STAGES
+                       if record["stage"] in ("AnalystAgent", "PlannerAgent")]
+        fell_back = [record["stage"] for record in qwen_stages
+                     if record["status"] == "degraded"]
+
+        if fell_back:
+            from tools.llm_client import describe_backend
+
+            backend = describe_backend()
+            log("=" * 78)
+            log("ATTENTION: %s did NOT run on the model - the deterministic fallback "
+                "was used, so requirements.json / plan.json are NOT the model's output."
+                % " and ".join(fell_back), level="error", stage="main")
+            if not backend["credential_present"]:
+                log("No credential is configured for the '%s' backend. Copy "
+                    ".env.example to .env and add the key (or set LLM_BASE_URL + "
+                    "LLM_API_KEY for a local server), then re-run."
+                    % backend["kind"], level="error", stage="main")
+            else:
+                log("A credential for the '%s' backend (%s, model %s) is present but "
+                    "the calls failed - check the key, the model name and that the "
+                    "server is reachable." % (backend["kind"], backend["base_url"],
+                                              backend["model"]),
+                    level="error", stage="main")
+            log("Verify first with: python check_llm.py", level="error", stage="main")
+
         log("=" * 78)
         log("AGENTIC PIPELINE END")
+        exit_code = 2 if fell_back else 0
     except Exception as error:
         log("PIPELINE ERROR: %s: %s" % (type(error).__name__, error),
             level="error", stage="main")
         import traceback
 
         traceback.print_exc()
+        exit_code = 1
     finally:
         stop_trace()
 
-    return 0
+    return exit_code
 
 
 if __name__ == "__main__":

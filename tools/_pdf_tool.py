@@ -7,6 +7,18 @@ import re
 import sys
 import zlib
 
+
+import os
+import sys
+
+# tools/ holds helper scripts, so the repository root is one level up. Importing
+# the agents (analyst_agent, runner, test_irsim_with_agent, ...) requires the
+# root on sys.path; without this, running a script from tools/ fails with
+# ModuleNotFoundError.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 OBJ_RE = re.compile(rb"(\d+)\s+(\d+)\s+obj\b")

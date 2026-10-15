@@ -32,10 +32,19 @@ import re
 import subprocess
 import sys
 
-from openai import OpenAI
 
-MODEL = os.getenv("QWEN_MODEL", "qwen-plus")
-BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+from tools.llm_client import (
+    describe_backend,
+    get_base_url,
+    get_client,
+    get_model,
+    load_env_file as _load_env_file,
+)
+
+# Which model / endpoint the agents talk to.  DashScope + qwen-plus by default;
+# see llm_client.py for the LLM_BASE_URL / LLM_API_KEY overrides.
+MODEL = get_model()
+BASE_URL = get_base_url()
 MAX_ATTEMPTS = 3
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -543,31 +552,8 @@ def _strip_code_fences(text):
     return text
 
 
-def _load_env_file():
-    env_path = os.path.join(HERE, ".env")
-    if not os.path.exists(env_path):
-        return
-    with open(env_path, "r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, _, value = line.partition("=")
-            value = value.strip().strip('"').strip("'")
-            os.environ.setdefault(key.strip(), value)
-
-
-def get_client():
-    _load_env_file()
-    api_key = os.getenv("DASHSCOPE_API_KEY")
-    if not api_key:
-        raise RuntimeError(
-            "DASHSCOPE_API_KEY is not set. Configure it before running:\n"
-            '  PowerShell : $env:DASHSCOPE_API_KEY = "sk-..."\n'
-            '  bash       : export DASHSCOPE_API_KEY="sk-..."\n'
-            "or put  DASHSCOPE_API_KEY=sk-...  in a .env file next to this script."
-        )
-    return OpenAI(api_key=api_key, base_url=BASE_URL)
+# _load_env_file() and get_client() come from llm_client so that the backend
+# (DashScope by default) is resolved in exactly one place.
 
 
 def main(argv=None):

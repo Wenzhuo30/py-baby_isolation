@@ -22,17 +22,24 @@ Public API:
     run_analyst(brief_text)   -> validated requirements (dict)
     validate_requirements(d)  -> validated requirements (dict)
     get_client()              -> configured OpenAI-compatible Qwen client
+    test_connection()         -> pre-flight result dict (used by check_llm.py)
 """
 
 import json
-import os
 import re
 
-from openai import OpenAI
+from tools.llm_client import (
+    describe_backend,
+    get_base_url,
+    get_client,
+    get_model,
+    load_env_file as _load_env_file,
+)
 
-# Qwen model used for the analysis (override with the QWEN_MODEL env var).
-MODEL = os.getenv("QWEN_MODEL", "qwen-plus")
-BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+# Which model / endpoint the agents talk to.  DashScope + qwen-plus by default;
+# see llm_client.py for the LLM_BASE_URL / LLM_API_KEY overrides.
+MODEL = get_model()
+BASE_URL = get_base_url()
 
 # The only keys / actions allowed in the whole system.
 REQUIRED_KEYS = {"goal", "allowed_actions", "safe_stop", "avoid_obstacles"}
@@ -62,37 +69,114 @@ RULES AND CONSTRAINTS:
 """
 
 
-def _load_env_file():
-    """Load KEY=VALUE pairs from a .env file located next to this script.
+# _load_env_file() and get_client() are imported from llm_client: they resolve
+# the backend (DashScope by default, LLM_BASE_URL/LLM_API_KEY to override) in
+# exactly one place instead of once per agent.
 
-    This is a tiny, dependency-free loader so the API key can be configured
-    without installing python-dotenv. Existing environment variables win.
+
+def test_connection(timeout=None):
+    """Pre-flight check used by ``check_llm.py`` before a graded pipeline run.
+
+    The Requirements Engineering instructions require the requirements JSON to be
+    produced by Qwen and "not your Python program".  Without this check a missing
+    or invalid key is only discovered *after* the Analyst stage, i.e. after the
+    expensive IR-SIM benchmark has already run, and the pipeline would silently
+    fall back to the deterministic implementation instead of failing loudly.
+
+    Sends one minimal request that also asks for ``response_format=json_object``,
+    because that is exactly what every agent in this pipeline relies on: a key
+    that works but a model that rejects JSON mode would still break the run.
+
+    The token budget is deliberately generous and doubled on retry: "thinking"
+    models (qwen3 and friends) spend the budget on an internal reasoning block
+    first, so a small ``max_tokens`` makes them return an *empty* message even
+    though the request succeeded.  Reporting that as a hard failure would be
+    wrong - it only means the budget was too small.
+
+    Returns a dict describing the outcome; it never raises for an API problem, so
+    the caller can report the precise cause.
     """
-    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-    if not os.path.exists(env_path):
-        return
-    with open(env_path, "r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, _, value = line.partition("=")
-            value = value.strip().strip('"').strip("'")
-            os.environ.setdefault(key.strip(), value)
+    backend = describe_backend()
 
+    # A local model running on CPU needs far longer than a hosted API: qwen3:8b
+    # on this machine takes ~50s for a JSON answer.  A tight default timeout
+    # would make a working local backend look broken.
+    if timeout is None:
+        timeout = 300.0 if backend["kind"] in ("local", "custom") else 60.0
 
-def get_client():
-    """Build an OpenAI-compatible client pointed at the Qwen API."""
-    _load_env_file()
-    api_key = os.getenv("DASHSCOPE_API_KEY")
-    if not api_key:
-        raise RuntimeError(
-            "DASHSCOPE_API_KEY is not set. Configure it before running:\n"
-            '  PowerShell : $env:DASHSCOPE_API_KEY = "sk-..."\n'
-            '  bash       : export DASHSCOPE_API_KEY="sk-..."\n'
-            "or put  DASHSCOPE_API_KEY=sk-...  in a .env file next to this script."
+    result = {
+        "model": MODEL,
+        "base_url": BASE_URL,
+        "backend": backend,
+        "key_present": backend["credential_present"],
+        "ok": False,
+        "error": None,
+        "detail": None,
+        "reply": None,
+        "empty_on_first_try": False,
+        "timeout": timeout,
+    }
+
+    try:
+        client = get_client()
+    except Exception as error:  # missing key -> get_client already explains how to set it
+        result["error"] = type(error).__name__
+        result["detail"] = str(error)
+        return result
+
+    messages = [
+        {"role": "system", "content": "Reply with a single JSON object."},
+        {"role": "user", "content": 'Return exactly {"ok": true} as JSON.'},
+    ]
+
+    # 2048 is a ceiling, not a target: it costs nothing on a normal model and
+    # leaves room for a reasoning block on a thinking model.
+    for attempt, budget in enumerate((2048, 4096), start=1):
+        try:
+            response = client.chat.completions.create(
+                model=MODEL,
+                response_format={"type": "json_object"},
+                messages=messages,
+                temperature=0.0,
+                max_tokens=budget,
+                timeout=timeout,
+            )
+        except Exception as error:
+            result["error"] = type(error).__name__
+            status = getattr(error, "status_code", None)
+            code = getattr(error, "code", None)
+            message = " ".join(str(error).split())
+            result["detail"] = " ".join(
+                part for part in (
+                    ("HTTP %s" % status) if status else "",
+                    ("code=%s" % code) if code else "",
+                    ("max_tokens=%d" % budget),
+                    message[:300],
+                ) if part
+            )
+            return result
+
+        content = None
+        try:
+            content = (response.choices[0].message.content or "").strip()
+        except Exception:
+            content = ""
+
+        if content:
+            result["ok"] = True
+            result["reply"] = content[:200]
+            return result
+
+        # Empty answer: almost always the reasoning block ate the whole budget.
+        result["empty_on_first_try"] = True
+        result["detail"] = (
+            "the model returned an empty message with max_tokens=%d; retrying "
+            "with a larger budget (thinking models spend it on reasoning first)"
+            % budget
         )
-    return OpenAI(api_key=api_key, base_url=BASE_URL)
+
+    result["error"] = "EmptyResponse"
+    return result
 
 
 def _parse_json(text):

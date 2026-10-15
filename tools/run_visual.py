@@ -29,12 +29,20 @@ replaced: this is only a wrapper that makes the same four runs reproducible and
 reviewable without a screen.
 
 Usage:
-    python run_visual.py                  # the four worlds of the instructions
+    python run_visual.py                  # head-less: PNG snapshots only
+    python run_visual.py --show           # a window per world (like run_visual.sh)
+    python run_visual.py --hold 5         # a window per world, auto-closed after 5s
     python run_visual.py <world.yaml> ... # explicit world files
 
 The PNG snapshots are regenerable build output, so ``visuals/`` is git-ignored;
-``--keep`` is not offered on purpose - re-running this script after a code change
-is cheaper than trusting a stored picture.
+re-running this script after a code change is cheaper than trusting a stored
+picture.
+
+Note on the interactive mode: ``test_irsim_with_agent.py`` calls ``env.end()``
+(which closes the figure) *before* its own ``plt.show()``, so that show() has
+nothing left to display. ``--show`` therefore keeps the figure alive across
+``end()`` and displays it once the provided script has finished, which produces
+the popup you actually want to look at.
 """
 
 import json
@@ -43,11 +51,23 @@ import os
 import sys
 import time
 
+
+import os
+import sys
+
+# tools/ holds helper scripts, so the repository root is one level up. Importing
+# the agents (analyst_agent, runner, test_irsim_with_agent, ...) requires the
+# root on sys.path; without this, running a script from tools/ fails with
+# ModuleNotFoundError.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-VISUALS_DIR = os.path.join(HERE, "visuals")
+VISUALS_DIR = os.path.join(ROOT, "visuals")
 REPORT_PATH = os.path.join(VISUALS_DIR, "visual_run_report.json")
 
 # The four worlds the instructions list, in the order they must be simulated.
@@ -59,42 +79,66 @@ DEFAULT_WORLDS = (
 )
 
 
-def _configure_headless_matplotlib():
-    """Use the non-interactive backend and stop plt.show() from blocking."""
+def _configure_matplotlib(show=False):
+    """Prepare matplotlib for either a head-less run or a visible window.
+
+    show=False (default): the non-interactive Agg backend, so a batch or CI run
+        never opens a window and never blocks.
+    show=True: whatever interactive backend the machine has (TkAgg on Windows),
+        and plt.show() is left alone so the window really appears.
+    """
     if "MPLCONFIGDIR" not in os.environ:
-        os.environ["MPLCONFIGDIR"] = os.path.join(HERE, ".mplconfig")
+        os.environ["MPLCONFIGDIR"] = os.path.join(ROOT, ".mplconfig")
 
     import matplotlib
 
-    matplotlib.use("Agg")
+    if not show:
+        matplotlib.use("Agg")
+
     import matplotlib.pyplot as plt
 
-    plt.show = lambda *args, **kwargs: None
+    if not show:
+        plt.show = lambda *args, **kwargs: None  # never block an automated run
     return plt
 
 
-def run_world(world_file, plt):
-    """Run one world through test_irsim_with_agent.py and save a PNG.
+def run_world(world_file, plt, show=False, hold=None):
+    """Run one world through test_irsim_with_agent.py.
+
+    Always writes a PNG snapshot.  With ``show=True`` the simulation window is
+    also displayed, which is what ``run_visual.sh`` does interactively.
 
     Returns the report dict that ``test_irsim_with_agent.main()`` writes to
     ``artifacts/irsim_report.json``, extended with the snapshot path.
     """
     import irsim
-    import test_irsim_with_agent as sim
+
+    # The provided script does two things with a *relative* "artifacts" path: it
+    # calls os.makedirs() at import time, and writes its report at the end. Both
+    # resolve against the working directory, so the import has to happen from the
+    # repository root or a stray tools/artifacts/ appears.
+    original_cwd = os.getcwd()
+    os.chdir(ROOT)
+    try:
+        import test_irsim_with_agent as sim
+    finally:
+        os.chdir(original_cwd)
 
     if os.path.isabs(world_file):
         world_path = world_file
     else:
-        world_path = os.path.join(HERE, world_file)
+        world_path = os.path.join(ROOT, world_file)
     if not os.path.exists(world_path):
         raise FileNotFoundError("IR-SIM world file not found: %s" % world_path)
 
-    world_rel = os.path.relpath(world_path, HERE)
+    world_rel = os.path.relpath(world_path, ROOT)
     name = os.path.splitext(os.path.basename(world_rel))[0]
     snapshot_path = os.path.join(VISUALS_DIR, "%s.png" % name)
 
     print("=" * 72)
     print("[run_visual] world: %s" % world_rel)
+    if show:
+        print("[run_visual] a simulation window will open for this world")
     print("=" * 72)
 
     os.makedirs(VISUALS_DIR, exist_ok=True)
@@ -122,7 +166,7 @@ def run_world(world_file, plt):
                     snapshot_path, dpi=110, bbox_inches="tight"
                 )
                 print("[run_visual] snapshot written as the run finished: %s"
-                      % os.path.relpath(snapshot_path, HERE))
+                      % os.path.relpath(snapshot_path, ROOT))
             except Exception as error:  # a failed snapshot must not break the run
                 print("[run_visual] could not save the snapshot: %s: %s"
                       % (type(error).__name__, error))
@@ -134,6 +178,28 @@ def run_world(world_file, plt):
 
         def end_and_save(*end_args, **end_kwargs):
             save_snapshot()
+            if show:
+                # The provided script's own plt.show() runs *after* end() has
+                # closed the figure, so it would display nothing.  Keeping the
+                # figure alive across end() is what makes that final show()
+                # open the window.  plt.close is left usable on purpose: the
+                # auto-close timer below needs a working close().
+                captured["keep_window"] = True
+                if hold is not None:
+
+                    def _close_window(*_timer_args):
+                        print("[run_visual] auto-closing the window after %gs" % hold,
+                              flush=True)
+                        original_close("all")
+
+                    try:
+                        timer = plt.gcf().canvas.new_timer(interval=int(hold * 1000))
+                        timer.add_callback(_close_window)
+                        timer.start()
+                        captured["timer"] = timer
+                    except Exception as error:
+                        print("[run_visual] could not arm the auto-close timer: %s: %s"
+                              % (type(error).__name__, error))
             env.end = original_end
             return original_end(*end_args, **end_kwargs)
 
@@ -143,21 +209,37 @@ def run_world(world_file, plt):
     original_make = irsim.make
     original_sleep = time.sleep
     original_argv = list(sys.argv)
+    original_close = plt.close
+    original_cwd = os.getcwd()
     irsim.make = capture_env
     sys.argv = ["test_irsim_with_agent.py", world_rel]
     time.sleep = lambda seconds=0: None  # only there to keep the GUI window open
+
+    if show:
+        # env.end() calls plt.close(figure); in show mode the window must survive
+        # that call so the provided script's final, blocking plt.show() has a
+        # figure to display.  This is the whole trick: without it that show()
+        # runs against zero figures and the window never appears.
+        plt.close = lambda *close_args, **close_kwargs: None
+
     try:
-        sim.main()  # the provided entry point, unchanged
+        # The provided script writes its report with a *relative* path
+        # ("artifacts/irsim_report.json"), so the working directory decides where
+        # it lands.  Running this tool from inside tools/ would otherwise create
+        # tools/artifacts/ and split the project's outputs in two.
+        os.chdir(ROOT)
+        sim.main()  # the provided entry point, unchanged - it displays the window
     finally:
+        os.chdir(original_cwd)
         irsim.make = original_make
         time.sleep = original_sleep
         sys.argv = original_argv
+        plt.close = original_close
 
     # If the world returned early, or end() was never reached, capture whatever
     # the figure currently shows.
     if not captured["saved"]:
         save_snapshot()
-    plt.close("all")
 
     env = captured["env"]
     robot = env.robot_list[0] if env is not None else None
@@ -169,7 +251,19 @@ def run_world(world_file, plt):
                         if final_pose and goal else None)
     saved = captured["saved"]
 
-    report_path = os.path.join(HERE, "artifacts", "irsim_report.json")
+    # The window was already displayed (and blocking) inside main(), by the
+    # provided script's own final plt.show() - the figure simply had to survive
+    # env.end() for that to work.  Only clean up here.
+    timer = captured.get("timer")
+    if timer is not None:
+        try:
+            timer.stop()
+        except Exception:
+            pass
+
+    plt.close("all")
+
+    report_path = os.path.join(ROOT, "artifacts", "irsim_report.json")
     report = {}
     if os.path.exists(report_path):
         try:
@@ -184,7 +278,7 @@ def run_world(world_file, plt):
         "final_pose": final_pose,
         "distance_to_goal": (round(distance_to_goal, 3)
                              if distance_to_goal is not None else None),
-        "snapshot": os.path.relpath(snapshot_path, HERE) if saved else None,
+        "snapshot": os.path.relpath(snapshot_path, ROOT) if saved else None,
         "visual_check": "goal reached" if report.get("reached_goal")
                         else "goal NOT reached",
     })
@@ -196,12 +290,34 @@ def run_world(world_file, plt):
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
-    world_files = argv or list(DEFAULT_WORLDS)
 
-    plt = _configure_headless_matplotlib()
+    # --show opens the interactive simulation window (what run_visual.sh does);
+    # --hold N keeps each window open for N seconds instead of until closed.
+    show = "--show" in argv
+    hold = None
+    if "--hold" in argv:
+        index = argv.index("--hold")
+        try:
+            hold = float(argv[index + 1])
+            show = True  # holding a window only makes sense if it is shown
+        except (IndexError, ValueError):
+            print("--hold needs a number of seconds, e.g. --hold 5")
+            return 1
+        del argv[index:index + 2]
+
+    world_files = [a for a in argv if not a.startswith("--")] or list(DEFAULT_WORLDS)
+
+    plt = _configure_matplotlib(show=show)
     os.makedirs(VISUALS_DIR, exist_ok=True)
 
-    print("IR-SIM VISUAL RUN (head-less batch, same four worlds as run_visual.sh)")
+    if show:
+        print("IR-SIM VISUAL RUN (interactive: a window opens per world)")
+        if hold is None:
+            print("Close a window to continue with the next world")
+        else:
+            print("Each window closes by itself after %gs" % hold)
+    else:
+        print("IR-SIM VISUAL RUN (head-less batch, same four worlds as run_visual.sh)")
     print("Navigation logic: generated/navigation_logic.py")
     print()
 
@@ -209,7 +325,7 @@ def main(argv=None):
     failures = 0
     for world_file in world_files:
         try:
-            results.append(run_world(world_file, plt))
+            results.append(run_world(world_file, plt, show=show, hold=hold))
         except Exception as error:  # a broken world must not abort the batch
             failures += 1
             print("[run_visual] %s FAILED: %s: %s"
@@ -243,8 +359,8 @@ def main(argv=None):
     print("-" * 72)
     print("goals reached: %d/%d (success rate %.2f)"
           % (reached, total, summary["success_rate"]))
-    print("snapshots     : %s" % os.path.relpath(VISUALS_DIR, HERE))
-    print("report        : %s" % os.path.relpath(REPORT_PATH, HERE))
+    print("snapshots     : %s" % os.path.relpath(VISUALS_DIR, ROOT))
+    print("report        : %s" % os.path.relpath(REPORT_PATH, ROOT))
     print("=" * 72)
     return 0 if reached == total and total else 1
 

@@ -22,6 +22,8 @@ import pytest
 
 from planner_agent import _load_env_file, run_planner, validate_plan
 
+from tools.llm_client import get_api_key
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REQUIREMENTS_PATH = os.path.join(HERE, "artifacts", "requirements.json")
 ARTIFACTS_DIR = os.path.join(HERE, "artifacts")
@@ -30,7 +32,7 @@ OUTPUT_PATH = os.path.join(ARTIFACTS_DIR, "plan.json")
 # The Planner Agent has no deterministic fallback either, so the same rule as in
 # test_analyst.py applies: skip when the key is missing, assert hard otherwise.
 _load_env_file()
-HAS_API_KEY = bool(os.getenv("DASHSCOPE_API_KEY"))
+HAS_API_KEY = bool(get_api_key())  # DashScope key or a local LLM_API_KEY
 
 
 @pytest.mark.skipif(not HAS_API_KEY,

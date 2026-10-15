@@ -27,6 +27,7 @@ Public API:
     validate_navigation_behaviour(code)       -> dict (evaluation)
     build_fallback_navigation_code(...)       -> str
     write_navigation_logic(code, path=None)   -> str (path)
+    refresh_artifact_copy(code, path=None)    -> str (path of artifacts/ copy)
 """
 
 import importlib.util
@@ -36,15 +37,27 @@ import os
 import re
 import sys
 
-from openai import OpenAI
 
-MODEL = os.getenv("QWEN_MODEL", "qwen-plus")
-BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+from tools.llm_client import (
+    describe_backend,
+    get_base_url,
+    get_client,
+    get_model,
+    load_env_file as _load_env_file,
+)
+
+# Which model / endpoint the agents talk to.  DashScope + qwen-plus by default;
+# see llm_client.py for the LLM_BASE_URL / LLM_API_KEY overrides.
+MODEL = get_model()
+BASE_URL = get_base_url()
 MAX_ATTEMPTS = 3
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GENERATED_DIR = os.path.join(HERE, "generated")
+ARTIFACTS_DIR = os.path.join(HERE, "artifacts")
 DEFAULT_OUTPUT_PATH = os.path.join(GENERATED_DIR, "navigation_logic.py")
+# The Testing instructions also expect the navigation logic under artifacts/.
+ARTIFACTS_NAVIGATION_PATH = os.path.join(ARTIFACTS_DIR, "navigation_logic.py")
 
 STATE_KEYS = (
     "blocked_front",
@@ -123,7 +136,6 @@ The revision must:
 6. Address the review notes explicitly - do not ignore a reported issue.
 7. Do not output markdown, code fences or any explanatory text, only the code.
 """ % {"state_contract": STATE_CONTRACT}
-
 
 
 # Validation
@@ -271,7 +283,6 @@ def validate_navigation_behaviour(code, expected_path=None):
     return evaluation
 
 
-
 # Deterministic fallback implementation
 NAVIGATION_CODE_TEMPLATE = '''"""
 navigation_logic.py
@@ -409,7 +420,13 @@ def build_fallback_navigation_code(plan=None, revision_notes=None):
 
 
 def write_navigation_logic(code, path=None):
-    """Validate and save navigation code, returning the written path."""
+    """Validate and save navigation code, returning the written path.
+
+    Whenever the *default* logic file is written (by any entry point - main.py,
+    run_developer.py, developer_agent.main), the documented
+    ``artifacts/navigation_logic.py`` copy is refreshed as well, so the two
+    documented paths can never disagree about what the pipeline measured.
+    """
     validate_code(code)
     if path is None:
         path = DEFAULT_OUTPUT_PATH
@@ -419,7 +436,41 @@ def write_navigation_logic(code, path=None):
         handle.write(code)
         if not code.endswith("\n"):
             handle.write("\n")
+
+    # Keep artifacts/navigation_logic.py identical to the logic the pipeline
+    # actually imports and benchmarks (never recurse when writing it itself).
+    if path != os.path.abspath(ARTIFACTS_NAVIGATION_PATH):
+        refresh_artifact_copy(code)
+
     return path
+
+
+def refresh_artifact_copy(code, path=None):
+    """Keep the documented ``artifacts/navigation_logic.py`` copy in sync.
+
+    The Testing instructions name the navigation logic artifact as
+    ``artifacts/navigation_logic.py`` while the closing checklist names
+    ``generated/navigation_logic.py``; the rest of the pipeline imports the
+    ``generated/`` file.  Both paths must therefore hold the *same* final code,
+    otherwise the repository contains two different "navigation logic"
+    artifacts and a reader cannot tell which one the benchmark measured.  The
+    file is only rewritten when its content actually changed.
+    """
+    if path is None:
+        path = ARTIFACTS_NAVIGATION_PATH
+    path = os.path.abspath(path)
+
+    existing = None
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                existing = handle.read()
+        except OSError:
+            existing = None
+
+    if existing is not None and existing.rstrip("\n") == code.rstrip("\n"):
+        return path
+    return write_navigation_logic(code, path)
 
 
 # Developer agent runs
@@ -550,31 +601,8 @@ def run_developer_revision(original_code, review_notes, benchmark_report,
 # ---------------------------------------------------------------------------
 # Helpers (same style as the Analyst / Planner / Test agents)
 # ---------------------------------------------------------------------------
-def _load_env_file():
-    env_path = os.path.join(HERE, ".env")
-    if not os.path.exists(env_path):
-        return
-    with open(env_path, "r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, _, value = line.partition("=")
-            value = value.strip().strip('"').strip("'")
-            os.environ.setdefault(key.strip(), value)
-
-
-def get_client():
-    _load_env_file()
-    api_key = os.getenv("DASHSCOPE_API_KEY")
-    if not api_key:
-        raise RuntimeError(
-            "DASHSCOPE_API_KEY is not set. Configure it before running:\n"
-            '  PowerShell : $env:DASHSCOPE_API_KEY = "sk-..."\n'
-            '  bash       : export DASHSCOPE_API_KEY="sk-..."\n'
-            "or put  DASHSCOPE_API_KEY=sk-...  in a .env file next to this script."
-        )
-    return OpenAI(api_key=api_key, base_url=BASE_URL)
+# _load_env_file() and get_client() come from llm_client so that the backend
+# (DashScope by default) is resolved in exactly one place.
 
 
 def _parse_code(text):
